@@ -15,6 +15,8 @@
 
 control_climas_auto_man <- function(nombre_PLC){
 
+  nombre_PLC <- as.character(nombre_PLC)
+
   # ==============================================================================
   # PETICIÓN TOKENs THB
   # ==============================================================================
@@ -42,11 +44,7 @@ control_climas_auto_man <- function(nombre_PLC){
            "16b901b0-1e90-11ec-a3bf-39d69cec15b9","21e9d820-1e90-11ec-a3bf-39d69cec15b9")
   names(ids) <- c("PLC P8","PLC P7","PLC P6_2","PLC P6_1","PLC P5","PLC P4","PLC P3","PLC P2","PLC P1","PLC PB","PLC Metro Plaza","PLC Metro P4","PLC Metro Avenida","PLC Metro Interior")
 
-
-  num_climas <- 3
-  id_planta <- ids["PLC P7"]
-
-
+  id_planta <- ids[nombre_PLC]
 
 
   # ATR
