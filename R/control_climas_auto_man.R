@@ -61,8 +61,9 @@ control_climas_auto_man <- function(nombre_PLC){
 
     for(i in 1:length(pos)){
       # Puesta en auto
+      sensor <- pos[i]
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"false"','}',sep = "")
+      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',sensor,'":', '"false"','}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,

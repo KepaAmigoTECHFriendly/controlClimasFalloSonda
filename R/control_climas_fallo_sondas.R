@@ -147,7 +147,8 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
   keys <- URLencode(c("temperatura"))
   for(i in 1:length(numero_fallos)){  # Bucle actuación por sonda que da fallo
 
-    url_thb_temps <- paste("http://88.99.184.239:30951/api/plugins/telemetry/DEVICE/",df_disp_temp$id[i],"/values/timeseries?limit=10000&keys=",keys,"&startTs=",fecha_1,"&endTs=",fecha_2,sep = "")
+    sensor <- numero_fallos[i]
+    url_thb_temps <- paste("http://88.99.184.239:30951/api/plugins/telemetry/DEVICE/",df_disp_temp$id[sensor],"/values/timeseries?limit=10000&keys=",keys,"&startTs=",fecha_1,"&endTs=",fecha_2,sep = "")
     peticion <- GET(url_thb_temps, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
 
     # Tratamiento datos. De raw a dataframe
@@ -162,7 +163,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
 
       # Puesta en manual
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"true"','}',sep = "")
+      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',sensor,'":', '"true"','}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
@@ -172,7 +173,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
       Sys.sleep(10)
       # Abrir válvula frío al 100%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',i,'":', 99,'}',sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',sensor,'":', 99,'}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
@@ -182,7 +183,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
       Sys.sleep(10)
       # Cerra válvula calor al 1%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',i,'":', 1,'}',sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',sensor,'":', 1,'}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
@@ -193,7 +194,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
     }else if(as.numeric(df_temperatura$temperatura) < df_consignas_seleccion$value[1][[1]] & df_consignas_seleccion$value[1][[1]] - as.numeric(df_temperatura$temperatura) > 1.5){  # HACE FRÍO PUESTA EN MANUAL Y ABRIR CALOR
       # Puesta en manual
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"true"','}',sep = "")
+      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',sensor,'":', '"true"','}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
@@ -203,7 +204,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
       Sys.sleep(10)
       # Abrir válvula frío al 100%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',i,'":', 99,'}',sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',sensor,'":', 99,'}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
@@ -213,7 +214,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
       Sys.sleep(10)
       # Cerra válvula calor al 1%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',i,'":', 1,'}',sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',sensor,'":', 1,'}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
@@ -224,7 +225,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
     }else{
       # Abrir válvula frío al 100%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',i,'":', 10,'}',sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',sensor,'":', 10,'}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
@@ -234,7 +235,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
       Sys.sleep(10)
       # Cerra válvula calor al 1%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',i,'":', 10,'}',sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',sensor,'":', 10,'}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
