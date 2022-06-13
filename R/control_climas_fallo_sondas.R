@@ -133,7 +133,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
   # Tratamiento datos. De raw a dataframe
   df_disp <- jsonlite::fromJSON(rawToChar(peticion$content))
 
-  df_disp_temp <- df_disp[df_disp$type == c("Sensor de temperatura, humedad relativa y presencia","Sensores CO2"),]
+  df_disp_temp <- df_disp[df_disp$type %in% c("Sensor de temperatura, humedad relativa y presencia","Sensores CO2"),]
   ids <- df_disp_temp[,1][,2]
   df_disp_temp <- df_disp_temp[,-1]
   df_disp_temp <- df_disp_temp[,c("type","name")]
