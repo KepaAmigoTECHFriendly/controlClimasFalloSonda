@@ -56,7 +56,11 @@ control_climas_auto_man <- function(nombre_PLC){
 
   df_atr <- df_atr[grep("Modo trabajo climatizadora",df_atr$key),]
 
+  print(df_atr)
+  print(any(df_atr$value))
+
   if(any(df_atr$value)){
+    print("Entro")
     pos <- grep("true",df_atr$value,ignore.case = TRUE)
 
     for(i in 1:length(pos)){
@@ -77,5 +81,5 @@ control_climas_auto_man <- function(nombre_PLC){
 
   print("------------ OK ------------------")
 
-  return(1)
+  return(json_envio_plataforma)
 }

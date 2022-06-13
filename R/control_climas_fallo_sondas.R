@@ -248,6 +248,6 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
 
   print("------------ OK ------------------")
 
-  return(1)
+  return(json_envio_plataforma)
 
 }
