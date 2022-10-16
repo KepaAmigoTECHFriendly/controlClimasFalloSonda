@@ -74,6 +74,22 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
   # Tratamiento datos. De raw a dataframe
   df <- jsonlite::fromJSON(rawToChar(peticion$content))
 
+  # Evitar diferencia de filas
+  num_min_filas <- 5000
+  #Obtencion del numero minimo de filas
+  for(i in 1:length(df)){
+    if(min(nrow(df[[i]])) < num_min_filas){
+      num_min_filas <- min(nrow(df[[i]]))
+    }
+  }
+
+  #Eliminar primera fila a los que superen el numero de filas minimo
+  for(i in 1:length(df)){
+    if(nrow(df[[i]]) > num_min_filas){
+      df[[i]] <- df[[i]][-1,]
+    }
+  }
+
   if(num_climas == 1){
     df_datos <- data.frame(format(df$temperatura_ambiente_1$ts,scientific=FALSE),df$temperatura_ambiente_1$value,stringsAsFactors = FALSE)
   }else if(num_climas == 2){
@@ -139,6 +155,11 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
   df_disp_temp <- df_disp_temp[,c("type","name")]
   df_disp_temp$id <- ids
 
+  # Ajuste e caso de P5
+  if(nombre_PLC == "PLC P5"){  # Tiene + de 3 sensores de temperatura y de estos, algunos no están asociados a la climatizadora
+    df_disp_temp <- df_disp_temp[-c(1,2,3,4),]
+  }
+  df_disp_temp <- df_disp_temp[c(1,3,2),]
 
 
   # ==============================================================================
