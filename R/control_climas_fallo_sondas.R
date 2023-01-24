@@ -102,7 +102,11 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
   # Orden por timestamp
   df_datos <- df_datos[order(df_datos$ts, decreasing = TRUE),]
   df_datos_ultima <- df_datos[1,]
-  df_datos_ultima <- df_datos_ultima[,-c(1,ncol(df_datos_ultima))]
+  if(ncol(df_datos_ultima) > 3){
+    df_datos_ultima <- df_datos_ultima[,-c(1,ncol(df_datos_ultima))]
+  }else{
+    df_datos_ultima <- df_datos_ultima[,-3]
+  }
 
   # ==============================================================================
   # IDENTIFICACIÓN DE FALLOS TEMPERATURAS
@@ -155,11 +159,13 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
   df_disp_temp <- df_disp_temp[,c("type","name")]
   df_disp_temp$id <- ids
 
-  # Ajuste e caso de P5
-  if(nombre_PLC == "PLC P5"){  # Tiene + de 3 sensores de temperatura y de estos, algunos no están asociados a la climatizadora
-    df_disp_temp <- df_disp_temp[-c(1,2,3,4),]
+  if(num_climas > 1){
+    # Ajuste e caso de P5
+    if(nombre_PLC == "PLC P5"){  # Tiene + de 3 sensores de temperatura y de estos, algunos no están asociados a la climatizadora
+      df_disp_temp <- df_disp_temp[-c(1,2,3,4),]
+    }
+    df_disp_temp <- df_disp_temp[c(1,3,2),]
   }
-  df_disp_temp <- df_disp_temp[c(1,3,2),]
 
 
   # ==============================================================================
