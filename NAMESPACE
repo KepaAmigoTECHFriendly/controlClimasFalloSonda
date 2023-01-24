@@ -2,6 +2,7 @@
 
 export(control_climas_auto_man)
 export(control_climas_fallo_electro)
+export(control_climas_fallo_electro_horario)
 export(control_climas_fallo_sondas)
 import(httr)
 import(jsonlite)

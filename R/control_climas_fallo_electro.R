@@ -157,9 +157,13 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
   col <- ncol(df_datos_ultima)
   for(i in 1:(col/2)){
     print(i)
-    if(as.numeric(df_datos_ultima[,(col/2)+i]) == 1){
+    if(as.numeric(df_datos_ultima[,(col/2)+i]) == 1){ # Si la climatizadora está encendida
       print(as.numeric(df_datos_ultima[,i]))
-      if(as.numeric(df_datos_ultima[,i]) < 50){
+      if(as.numeric(df_datos_ultima[,i]) < 50){ # Si la electroválvula está cerrada
+        numero_fallos <- c(numero_fallos, i)
+      }
+    }else if(as.numeric(df_datos_ultima[,(col/2)+i]) == 0){ # Si la climatizadora está apagada
+      if(as.numeric(df_datos_ultima[,i]) > 50){ # Si la electroválvula está abierta
         numero_fallos <- c(numero_fallos, i)
       }
     }else{
@@ -307,6 +311,17 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
       )
       Sys.sleep(10)
     }else{
+      # Puesta en manual
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',sensor,'":', '"true"','}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+
       # Abrir válvula calor al 10%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Grado apertura EV_calor ',sensor,'":', 10,'}',sep = "")
