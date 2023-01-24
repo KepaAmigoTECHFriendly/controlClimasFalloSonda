@@ -17,6 +17,9 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
 
   nombre_PLC <- as.character(nombre_PLC)
   num_climas <- as.numeric(num_climas)
+  if(num_climas == 2){
+    num_climas <- 1
+  }
 
   # ==============================================================================
   # PETICIÓN TOKENs THB
