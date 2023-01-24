@@ -61,6 +61,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
 
 
   # LLAMADA API EL TIEMPO PARA CONCER SI COMPROBAR ELECTROVÁLVULAS FRÍO O CALOR
+  set_config(config(ssl_verifypeer = 0L))
 
   url_thb_fechas <- "https://www.el-tiempo.net/api/json/v2/provincias/46/municipios/46244"
   peticion <- GET(url_thb_fechas, add_headers("Content-Type"="application/json","Accept"="application/json"))
