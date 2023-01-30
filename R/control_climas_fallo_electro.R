@@ -247,7 +247,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
     df_temperatura <- df_temperatura[1,]
 
     df_consignas_seleccion <- df_consignas[c((i*2)-1,i*2),]  #Selección consignas
-    if(as.numeric(df_temperatura$temperatura) > df_consignas_seleccion$value[2][[1]] & as.numeric(df_temperatura$temperatura) - df_consignas_seleccion$value[2][[1]] > 1.2){  # HACE CALOR. PUESTA EN MANUAL Y ABRIR FRIO
+    if(as.numeric(df_temperatura$temperatura) > df_consignas_seleccion$value[2][[1]] & as.numeric(df_temperatura$temperatura) - df_consignas_seleccion$value[2][[1]] > 1){  # HACE CALOR. PUESTA EN MANUAL Y ABRIR FRIO
 
       # Puesta en manual
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
@@ -279,7 +279,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          encode = "json",verbose()
       )
       Sys.sleep(10)
-    }else if(as.numeric(df_temperatura$temperatura) < df_consignas_seleccion$value[1][[1]] & df_consignas_seleccion$value[1][[1]] - as.numeric(df_temperatura$temperatura) > 1.2){  # HACE FRÍO PUESTA EN MANUAL Y ABRIR CALOR
+    }else if(as.numeric(df_temperatura$temperatura) < df_consignas_seleccion$value[1][[1]] & df_consignas_seleccion$value[1][[1]] - as.numeric(df_temperatura$temperatura) > 1){  # HACE FRÍO PUESTA EN MANUAL Y ABRIR CALOR
       # Puesta en manual
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',sensor,'":', '"true"','}',sep = "")
