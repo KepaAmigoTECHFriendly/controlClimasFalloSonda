@@ -272,16 +272,7 @@ control_climas_fallo_electro_horario <- function(nombre_PLC, num_climas){
                        encode = "json",verbose()
     )
 
-    Sys.sleep(10)
-    # Puesta en auto
-    url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-    json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',sensor,'":', '"false"','}',sep = "")
-    post <- httr::POST(url = url,
-                       add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-                       body = json_envio_plataforma,
-                       verify= FALSE,
-                       encode = "json",verbose()
-    )
+
 
 
   }
