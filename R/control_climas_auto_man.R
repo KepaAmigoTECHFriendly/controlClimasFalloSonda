@@ -46,21 +46,15 @@ control_climas_auto_man <- function(nombre_PLC){
 
   id_planta <- ids[nombre_PLC]
 
-
   # ATR
   url_thb_fechas <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/values/attributes/SERVER_SCOPE",sep = "")
   peticion <- GET(url_thb_fechas, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
 
   # Tratamiento datos. De raw a dataframe
   df_atr <- jsonlite::fromJSON(rawToChar(peticion$content))
-
   df_atr <- df_atr[grep("Modo trabajo climatizadora",df_atr$key),]
 
-  print(df_atr)
-  print(any(df_atr$value))
-
   if(any(df_atr$value)){
-    print("Entro")
     pos <- grep("true",df_atr$value,ignore.case = TRUE)
 
     for(i in 1:length(pos)){
@@ -76,7 +70,6 @@ control_climas_auto_man <- function(nombre_PLC){
       )
       Sys.sleep(10)
     }
-
   }
 
   print("------------ OK ------------------")

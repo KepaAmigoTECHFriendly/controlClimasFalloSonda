@@ -259,6 +259,18 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          encode = "json",verbose()
       )
       Sys.sleep(10)
+
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',sensor,'":', '"true"','}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+
       # Abrir válvula frío al 100%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Grado apertura EV_frio ',sensor,'":', 99,'}',sep = "")
@@ -290,6 +302,18 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          encode = "json",verbose()
       )
       Sys.sleep(10)
+
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',sensor,'":', '"true"','}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+
       # Abrir válvula calor al 100%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Grado apertura EV_calor ',sensor,'":', 99,'}',sep = "")
@@ -314,6 +338,17 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
       # Puesta en manual
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',sensor,'":', '"true"','}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',sensor,'":', '"false"','}',sep = "")
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
