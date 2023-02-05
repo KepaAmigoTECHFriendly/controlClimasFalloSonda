@@ -1,19 +1,19 @@
-#' @title Gestiona las climatizadoras frente a un problema en las electrovalvulas
+#' @title Gestiona la climatización (climas y electroválvulas) en base a temperatura de ERS
 #'
-#' @description Gestiona las climatizadoras frente a un problema en las electrovalvulas
+#' @description Gestiona la climatización (climas y electroválvulas) en base a temperatura de ERS
 #'
 #' @param nombre_PLC, num_climas
 #'
 #' @return json
 #'
-#' @examples  control_climas_fallo_electro("PLC P7",3)
+#' @examples  control_climas_temperatura("PLC P7",3)
 #'
 #' @import httr
 #' jsonlite
 #'
 #' @export
 
-control_climas_fallo_electro <- function(nombre_PLC, num_climas){
+control_climas_temperatura <- function(nombre_PLC, num_climas){
 
   nombre_PLC <- as.character(nombre_PLC)
   num_climas <- as.numeric(num_climas)
@@ -37,6 +37,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
 
   resultado_peticion_token <- httr::content(post)
   auth_thb <- paste("Bearer",resultado_peticion_token$token)
+
 
   # ==============================================================================
   # VECTORES ACTIVOS E IDs -- INPUTS
@@ -63,127 +64,6 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
   fecha_2 <- format(as.numeric(as.POSIXct(fecha_2))*1000,scientific = F)
 
 
-  # LLAMADA API EL TIEMPO PARA CONCER SI COMPROBAR ELECTROVÁLVULAS FRÍO O CALOR
-  set_config(config(ssl_verifypeer = 0L))
-
-  url_thb_fechas <- "https://www.el-tiempo.net/api/json/v2/provincias/46/municipios/46244"
-  peticion <- GET(url_thb_fechas, add_headers("Content-Type"="application/json","Accept"="application/json"))
-  if(peticion$status_code != 200){
-    cat("\n¡¡¡ ERROR EN LA API DE CONSULTA DEL TIEMPO: ",peticion$status_code)
-    t_max_tiempo <- 15
-  }else{
-    df_tiempo <- jsonlite::fromJSON(rawToChar(peticion$content))
-    t_max_tiempo <- as.numeric(df_tiempo$temperaturas$max)
-  }
-
-
-
-  if(t_max_tiempo < 22){
-    if(num_climas == 1){
-      keys <- URLencode(c("estado_electroválvula_1_calor,climatizadora_1"))
-    }else if(num_climas == 2){
-      keys <- URLencode(c("estado_electroválvula_1_calor,estado_electroválvula_2_calor,climatizadora_1,climatizadora_2"))
-    }else if(num_climas == 3){
-      keys <- URLencode(c("estado_electroválvula_1_calor,estado_electroválvula_2_calor,estado_electroválvula_3_calor,climatizadora_1,climatizadora_2,climatizadora_3"))
-    }
-  }else{
-    if(num_climas == 1){
-      keys <- URLencode(c("estado_electroválvula_1_frío,climatizadora_1"))
-    }else if(num_climas == 2){
-      keys <- URLencode(c("estado_electroválvula_1_frío,estado_electroválvula_2_frío,climatizadora_1,climatizadora_2"))
-    }else if(num_climas == 3){
-      keys <- URLencode(c("estado_electroválvula_1_frío,estado_electroválvula_2_frío,estado_electroválvula_3_frío,climatizadora_1,climatizadora_2,climatizadora_3"))
-    }
-  }
-
-
-
-  url_thb_fechas <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/values/timeseries?limit=10000&keys=",keys,"&startTs=",fecha_1,"&endTs=",fecha_2,sep = "")
-  peticion <- GET(url_thb_fechas, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
-
-  # Tratamiento datos. De raw a dataframe
-  df <- jsonlite::fromJSON(rawToChar(peticion$content))
-
-  num_min_filas <- 5000
-  #Obtencion del numero minimo de filas
-  for(i in 1:length(df)){
-    if(min(nrow(df[[i]])) < num_min_filas){
-      num_min_filas <- min(nrow(df[[i]]))
-    }
-  }
-
-  #Eliminar primera fila a los que superen el numero de filas minimo
-  for(i in 1:length(df)){
-    if(nrow(df[[i]]) > num_min_filas){
-      df[[i]] <- df[[i]][-1,]
-    }
-  }
-
-  if(t_max_tiempo < 22){
-    if(num_climas == 1){
-      df_datos <- data.frame(format(df$climatizadora_1$ts,scientific=FALSE),df$estado_electroválvula_1_calor$value,df$climatizadora_1$value,stringsAsFactors = FALSE)
-    }else if(num_climas == 2){
-      df_datos <- data.frame(format(df$climatizadora_1$ts,scientific=FALSE),df$estado_electroválvula_1_calor$value,df$estado_electroválvula_2_calor$value,df$climatizadora_1$value,df$climatizadora_2$value,stringsAsFactors = FALSE)
-    }else if(num_climas == 3){
-      df_datos <- data.frame(format(df$climatizadora_1$ts,scientific=FALSE),df$estado_electroválvula_1_calor$value,df$estado_electroválvula_2_calor$value,df$estado_electroválvula_3_calor$value,df$climatizadora_1$value,df$climatizadora_2$value,df$climatizadora_3$value,stringsAsFactors = FALSE)
-    }
-  }else{
-    if(num_climas == 1){
-      df_datos <- data.frame(format(df$climatizadora_1$ts,scientific=FALSE),df$estado_electroválvula_1_frío$value,df$climatizadora_1$value,stringsAsFactors = FALSE)
-    }else if(num_climas == 2){
-      df_datos <- data.frame(format(df$climatizadora_1$ts,scientific=FALSE),df$estado_electroválvula_1_frío$value,df$estado_electroválvula_2_frío$value,df$climatizadora_1$value,df$climatizadora_2$value,stringsAsFactors = FALSE)
-    }else if(num_climas == 3){
-      df_datos <- data.frame(format(df$climatizadora_1$ts,scientific=FALSE),df$estado_electroválvula_1_frío$value,df$estado_electroválvula_2_frío$value,df$estado_electroválvula_3_frío$value,df$climatizadora_1$value,df$climatizadora_2$value,df$climatizadora_3$value,stringsAsFactors = FALSE)
-    }
-  }
-
-
-
-  colnames(df_datos) <- c("ts",names(df))
-  df_datos$fecha_time <- as.POSIXct(as.numeric(df_datos$ts)/1000, origin = "1970-01-01")
-  # Orden por timestamp
-  df_datos <- df_datos[order(df_datos$ts, decreasing = TRUE),]
-  df_datos_ultima <- df_datos[1,]
-  if(ncol(df_datos_ultima) > 3){
-    df_datos_ultima <- df_datos_ultima[,-c(1,ncol(df_datos_ultima))]
-  }else{
-    df_datos_ultima <- df_datos_ultima[,-3]
-  }
-
-  # ==============================================================================
-  # IDENTIFICACIÓN DE FALLOS EN ACTIVACION ELECTROVALVULAS
-  # ==============================================================================
-  numero_fallos <- c()
-  col <- ncol(df_datos_ultima)
-  for(i in 1:(col/2)){
-    print(i)
-    if(as.numeric(df_datos_ultima[,(col/2)+i]) == 1){ # Si la climatizadora está encendida
-      print(as.numeric(df_datos_ultima[,i]))
-      if(as.numeric(df_datos_ultima[,i]) < 50){ # Si la electroválvula está cerrada
-        numero_fallos <- c(numero_fallos, i)
-      }
-    }else if(as.numeric(df_datos_ultima[,(col/2)+i]) == 0){ # Si la climatizadora está apagada
-      if(as.numeric(df_datos_ultima[,i]) > 50){ # Si la electroválvula está abierta
-        numero_fallos <- c(numero_fallos, i)
-      }
-    }else{
-      next
-    }
-  }
-
-  if(length(numero_fallos)>0){
-    numero_fallos <- as.numeric(gsub(".*?([0-9]+).*", "\\1", numero_fallos))
-  }else{
-    numero_fallos <-numeric(0)
-  }
-
-
-  if(identical(numero_fallos,numeric(0))){  # No hay errores
-    return(1)
-  }
-
-  # Atributos de temperatura que dan fallos
-
   # CONSIGNAS
   url_thb_fechas <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/values/attributes/SERVER_SCOPE",sep = "")
   peticion <- GET(url_thb_fechas, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
@@ -192,8 +72,8 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
   df_atr <- jsonlite::fromJSON(rawToChar(peticion$content))
   df_atributos_seleccion_parcial <- data.frame()
   df_atributos_seleccion <- data.frame()
-  for(i in 1:length(numero_fallos)){
-    df_atributos_seleccion_parcial <- df_atr[which(df_atr$key %in% c(paste("Consigna Tº ",numero_fallos[i],sep = ""), paste("Consigna Tº ",numero_fallos[i]," frio",sep = ""))),]
+  for(i in 1:num_climas){
+    df_atributos_seleccion_parcial <- df_atr[which(df_atr$key %in% c(paste("Consigna Tº ",i,sep = ""), paste("Consigna Tº ",i," frio",sep = ""))),]
     df_atributos_seleccion <- rbind(df_atributos_seleccion,df_atributos_seleccion_parcial)
   }
   df_consignas <- df_atributos_seleccion
@@ -229,14 +109,14 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
     df_disp_temp <- df_disp_temp[c(1,2,3),]
   }
 
+
   # ==============================================================================
   # GET TEMPERATURA ZONAS FALLOS
   # ==============================================================================
   keys <- URLencode(c("temperatura"))
-  for(i in 1:length(numero_fallos)){  # Bucle actuación por sonda que da fallo
+  for(i in 1:num_climas){  # Bucle actuación por sonda que da fallo
 
-    sensor <- numero_fallos[i]
-    url_thb_temps <- paste("http://88.99.184.239:30951/api/plugins/telemetry/DEVICE/",df_disp_temp$id[sensor],"/values/timeseries?limit=10000&keys=",keys,"&startTs=",fecha_1,"&endTs=",fecha_2,sep = "")
+    url_thb_temps <- paste("http://88.99.184.239:30951/api/plugins/telemetry/DEVICE/",df_disp_temp$id[i],"/values/timeseries?limit=10000&keys=",keys,"&startTs=",fecha_1,"&endTs=",fecha_2,sep = "")
     peticion <- GET(url_thb_temps, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
 
     # Tratamiento datos. De raw a dataframe
@@ -271,6 +151,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
       )
       Sys.sleep(10)
 
+
       # Abrir válvula frío al 100%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Grado apertura EV_frio ',sensor,'":', 99,'}',sep = "")
@@ -280,6 +161,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
+
       Sys.sleep(10)
       # Cerra válvula calor al 1%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
@@ -290,6 +172,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
+
       Sys.sleep(10)
     }else if(as.numeric(df_temperatura$temperatura) < df_consignas_seleccion$value[1][[1]] & df_consignas_seleccion$value[1][[1]] - as.numeric(df_temperatura$temperatura) > 1){  # HACE FRÍO PUESTA EN MANUAL Y ABRIR CALOR
       # Puesta en manual
@@ -301,6 +184,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
+
       Sys.sleep(10)
 
       # Encendido climatizadora
@@ -312,6 +196,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
+
       Sys.sleep(10)
 
       # Abrir válvula calor al 100%
@@ -323,6 +208,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
+
       Sys.sleep(10)
       # Cerra válvula frio al 1%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
@@ -333,6 +219,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
+
       Sys.sleep(10)
     }else{
       # Puesta en manual
@@ -344,9 +231,10 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
+
       Sys.sleep(10)
 
-      # Encendido climatizadora
+      # Apagado climatizadora
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',sensor,'":', '"false"','}',sep = "")
       post <- httr::POST(url = url,
@@ -355,6 +243,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
+
       Sys.sleep(10)
 
       # Abrir válvula calor al 10%
@@ -367,6 +256,7 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          encode = "json",verbose()
       )
       Sys.sleep(10)
+
       # Cerra válvula frio al 10%
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Grado apertura EV_frio ',sensor,'":', 10,'}',sep = "")
@@ -377,7 +267,16 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
                          encode = "json",verbose()
       )
 
-
+      Sys.sleep(10)
+      # Puesta en auto
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',sensor,'":', '"false"','}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
 
     }
   }
@@ -385,5 +284,4 @@ control_climas_fallo_electro <- function(nombre_PLC, num_climas){
   print("------------ OK ------------------")
 
   return(json_envio_plataforma)
-
 }

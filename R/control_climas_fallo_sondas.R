@@ -167,7 +167,7 @@ control_climas_fallo_sondas <- function(nombre_PLC, num_climas){
     if(nombre_PLC == "PLC P5"){  # Tiene + de 3 sensores de temperatura y de estos, algunos no están asociados a la climatizadora
       df_disp_temp <- df_disp_temp[-c(1,2,3,4),]
     }
-    df_disp_temp <- df_disp_temp[c(1,3,2),]
+    df_disp_temp <- df_disp_temp[c(1,2,3),]
   }
 
 
