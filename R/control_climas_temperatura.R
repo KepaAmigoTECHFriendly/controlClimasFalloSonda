@@ -105,7 +105,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   if(num_climas > 1){
     # Ajuste e caso de P5
     if(nombre_PLC == "PLC P5"){  # Tiene + de 3 sensores de temperatura y de estos, algunos no están asociados a la climatizadora
-      df_disp_temp <- df_disp_temp[-c(1,2,3,4),]
+      df_disp_temp <- df_disp_temp[c(6,7,8),]
     }else{
       if(any(grepl("Este",df_disp_temp$name))){
         pos_norte <- grep("Norte", df_disp_temp$name)
