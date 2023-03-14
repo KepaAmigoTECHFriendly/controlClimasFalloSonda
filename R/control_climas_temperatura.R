@@ -297,14 +297,14 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
 
       Sys.sleep(10)
       # Puesta en auto
-      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"false"','}',sep = "")
-      post <- httr::POST(url = url,
-                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-                         body = json_envio_plataforma,
-                         verify= FALSE,
-                         encode = "json",verbose()
-      )
+      #url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      #json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"false"','}',sep = "")
+      #post <- httr::POST(url = url,
+      #                   add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+      #                   body = json_envio_plataforma,
+      #                   verify= FALSE,
+      #                   encode = "json",verbose()
+      #)
 
     }
   }
