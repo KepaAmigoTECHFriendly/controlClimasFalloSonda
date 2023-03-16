@@ -10,6 +10,7 @@
 #'
 #' @import httr
 #' jsonlite
+#' lubridate
 #'
 #' @export
 
@@ -86,40 +87,64 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   # Tratamiento datos. De raw a dataframe
   df_relaciones <- jsonlite::fromJSON(rawToChar(peticion$content))
 
-
-  # LISTA DE DISPOSITIVOS RELACIONADOS
-  ids <- paste(df_relaciones$to$id, collapse = ",")
-  url_disp <- paste("http://88.99.184.239:30951/api/devices?deviceIds=",ids,sep = "")
-  peticion <- GET(url_disp, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
-
-  # Tratamiento datos. De raw a dataframe
-  df_disp <- jsonlite::fromJSON(rawToChar(peticion$content))
-
-  df_disp_temp <- df_disp[df_disp$type %in% c("Sensor de temperatura, humedad relativa y presencia","Sensores CO2"),]
-  ids <- df_disp_temp[,1][,2]
-  df_disp_temp <- df_disp_temp[,-1]
-  df_disp_temp <- df_disp_temp[,c("type","name")]
-  df_disp_temp$id <- ids
+  if(nombre_PLC != "PLC P6_1"){
 
 
-  if(num_climas > 1){
-    # Ajuste e caso de P5
-    if(nombre_PLC == "PLC P5"){  # Tiene + de 3 sensores de temperatura y de estos, algunos no están asociados a la climatizadora
-      df_disp_temp <- df_disp_temp[c(6,7,8),]
-    }else{
-      if(any(grepl("Este",df_disp_temp$name))){
-        pos_norte <- grep("Norte", df_disp_temp$name)
-        pos_este <- grep("Este", df_disp_temp$name)
-        pos_diaf <- grep("CO2", df_disp_temp$name)
-        if(identical(pos_diaf,integer(0))){
-          pos_diaf <- grep("C02", df_disp_temp$name)
-        }
+    # LISTA DE DISPOSITIVOS RELACIONADOS
+    ids <- paste(df_relaciones$to$id, collapse = ",")
+    url_disp <- paste("http://88.99.184.239:30951/api/devices?deviceIds=",ids,sep = "")
+    peticion <- GET(url_disp, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
 
-        df_disp_temp <- df_disp_temp[c(pos_norte,pos_este,pos_diaf),]
+    # Tratamiento datos. De raw a dataframe
+    df_disp <- jsonlite::fromJSON(rawToChar(peticion$content))
+
+    df_disp_temp <- df_disp[df_disp$type %in% c("Sensor de temperatura, humedad relativa y presencia","Sensores CO2"),]
+    ids <- df_disp_temp[,1][,2]
+    df_disp_temp <- df_disp_temp[,-1]
+    df_disp_temp <- df_disp_temp[,c("type","name")]
+    df_disp_temp$id <- ids
+
+
+    if(num_climas > 1){
+      # Ajuste e caso de P5
+      if(nombre_PLC == "PLC P5"){  # Tiene + de 3 sensores de temperatura y de estos, algunos no están asociados a la climatizadora
+        df_disp_temp <- df_disp_temp[c(6,7,8),]
       }else{
-        df_disp_temp <- df_disp_temp[c(1,2,3),]
+        if(any(grepl("Este",df_disp_temp$name))){
+          pos_norte <- grep("Norte", df_disp_temp$name)
+          pos_este <- grep("Este", df_disp_temp$name)
+          pos_diaf <- grep("CO2", df_disp_temp$name)
+          if(identical(pos_diaf,integer(0))){
+            pos_diaf <- grep("C02", df_disp_temp$name)
+          }
+
+          df_disp_temp <- df_disp_temp[c(pos_norte,pos_este,pos_diaf),]
+        }else{
+          df_disp_temp <- df_disp_temp[c(1,2,3),]
+        }
       }
     }
+  }else{ # Cierre si dispositivo != PLC P6_1
+
+    keys <- URLencode(c("temperatura_ambiente_1,temperatura_ambiente_2,temperatura_ambiente_3"))
+    url_thb_temps <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/values/timeseries?limit=10000&keys=",keys,sep = "")
+    peticion <- GET(url_thb_temps, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
+
+    # Tratamiento datos. De raw a dataframe
+    df <- jsonlite::fromJSON(rawToChar(peticion$content))
+    df <- do.call(rbind.data.frame, df)
+
+    tiempo_entre_fechas <- as.numeric(abs(difftime(as_datetime(df$ts[1]/1000), Sys.time(), units="hours")))
+    if(tiempo_entre_fechas > 1){
+      return(0)
+    }
+
+    for(i in 1:nrow(df)){
+      if(df$value[i] == 0){
+        return(0)
+      }
+    }
+
   }
 
 
@@ -129,32 +154,47 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   keys <- URLencode(c("temperatura"))
   for(i in 1:num_climas){  # Bucle actuación por sonda que da fallo
 
-    url_thb_temps <- paste("http://88.99.184.239:30951/api/plugins/telemetry/DEVICE/",df_disp_temp$id[i],"/values/timeseries?limit=10000&keys=",keys,"&startTs=",fecha_1,"&endTs=",fecha_2,sep = "")
-    peticion <- GET(url_thb_temps, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
+    if(nombre_PLC != "PLC P6_1"){
 
-    # Tratamiento datos. De raw a dataframe
-    df <- jsonlite::fromJSON(rawToChar(peticion$content))
+      url_thb_temps <- paste("http://88.99.184.239:30951/api/plugins/telemetry/DEVICE/",df_disp_temp$id[i],"/values/timeseries?limit=10000&keys=",keys,"&startTs=",fecha_1,"&endTs=",fecha_2,sep = "")
+      peticion <- GET(url_thb_temps, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
 
-    if(length(df) == 0){ # No hay datos del sensor demandado. Se pone automático.
-      # Puesta en auto
-      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"false"','}',sep = "")
-      post <- httr::POST(url = url,
-                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-                         body = json_envio_plataforma,
-                         verify= FALSE,
-                         encode = "json",verbose()
-      )
-      Sys.sleep(10)
-      return(json_envio_plataforma)
+      # Tratamiento datos. De raw a dataframe
+      df <- jsonlite::fromJSON(rawToChar(peticion$content))
+
+      if(length(df) == 0){ # No hay datos del sensor demandado. Se pone automático.
+        # Puesta en auto
+        url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+        json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"false"','}',sep = "")
+        post <- httr::POST(url = url,
+                           add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                           body = json_envio_plataforma,
+                           verify= FALSE,
+                           encode = "json",verbose()
+        )
+        Sys.sleep(10)
+        return(json_envio_plataforma)
+      }
+
+      df_temperatura <- data.frame(format(df$temperatura$ts,scientific=FALSE),df$temperatura$value,stringsAsFactors = FALSE)
+      colnames(df_temperatura) <- c("ts",names(df))
+      df_temperatura <- df_temperatura[order(df_temperatura$ts, decreasing = TRUE),]
+      df_temperatura <- df_temperatura[1,]
+
+      df_consignas_seleccion <- df_consignas[c((i*2)-1,i*2),]  #Selección consignas
+
+    }else{
+
+      df_temperatura <- df[i,]
+      colnames(df_temperatura)[2] <- "temperatura"
+      df_consignas_seleccion <- df_consignas[c((i*2)-1,i*2),]  #Selección consignas
+
     }
 
-    df_temperatura <- data.frame(format(df$temperatura$ts,scientific=FALSE),df$temperatura$value,stringsAsFactors = FALSE)
-    colnames(df_temperatura) <- c("ts",names(df))
-    df_temperatura <- df_temperatura[order(df_temperatura$ts, decreasing = TRUE),]
-    df_temperatura <- df_temperatura[1,]
 
-    df_consignas_seleccion <- df_consignas[c((i*2)-1,i*2),]  #Selección consignas
+
+
+
     if(as.numeric(df_temperatura$temperatura) > df_consignas_seleccion$value[2][[1]] & as.numeric(df_temperatura$temperatura) - df_consignas_seleccion$value[2][[1]] > 1){  # HACE CALOR. PUESTA EN MANUAL Y ABRIR FRIO
 
       # Puesta en manual
