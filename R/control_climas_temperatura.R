@@ -191,11 +191,13 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
 
     }
 
+    pos_frio <- grep(" frio", df_consignas_seleccion$key)
 
 
 
 
-    if(as.numeric(df_temperatura$temperatura) > df_consignas_seleccion$value[2][[1]] & as.numeric(df_temperatura$temperatura) - df_consignas_seleccion$value[2][[1]] > 0.1){  # HACE CALOR. PUESTA EN MANUAL Y ABRIR FRIO
+
+    if(as.numeric(df_temperatura$temperatura) > df_consignas_seleccion$value[pos_frio][[1]] & as.numeric(df_temperatura$temperatura) - df_consignas_seleccion$value[pos_frio][[1]] > 0.1){  # HACE CALOR. PUESTA EN MANUAL Y ABRIR FRIO
 
       # Puesta en manual
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
