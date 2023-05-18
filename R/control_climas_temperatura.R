@@ -163,17 +163,42 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
       df <- jsonlite::fromJSON(rawToChar(peticion$content))
 
       if(length(df) == 0){ # No hay datos del sensor demandado. Se pone automático.
-        # Puesta en auto
-        url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-        json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"false"','}',sep = "")
-        post <- httr::POST(url = url,
-                           add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-                           body = json_envio_plataforma,
-                           verify= FALSE,
-                           encode = "json",verbose()
-        )
-        Sys.sleep(10)
-        return(json_envio_plataforma)
+        if(num_climas > 1 & nrow(df_disp_temp) > 1){
+
+          # Puesta en auto
+          url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+          json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"false"','}',sep = "")
+          post <- httr::POST(url = url,
+                             add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                             body = json_envio_plataforma,
+                             verify= FALSE,
+                             encode = "json",verbose()
+          )
+          Sys.sleep(10)
+          return(json_envio_plataforma)
+
+        }else{# Intento recoger la temperatura del otro sensor
+
+          url_thb_temps <- paste("http://88.99.184.239:30951/api/plugins/telemetry/DEVICE/",df_disp_temp$id[i+1],"/values/timeseries?limit=10000&keys=",keys,"&startTs=",fecha_1,"&endTs=",fecha_2,sep = "")
+          peticion <- GET(url_thb_temps, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
+
+          # Tratamiento datos. De raw a dataframe
+          df <- jsonlite::fromJSON(rawToChar(peticion$content))
+
+          if(length(df) == 0){
+            # Puesta en auto
+            url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+            json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"false"','}',sep = "")
+            post <- httr::POST(url = url,
+                               add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                               body = json_envio_plataforma,
+                               verify= FALSE,
+                               encode = "json",verbose()
+            )
+            Sys.sleep(10)
+            return(json_envio_plataforma)
+          }
+        }
       }
 
       df_temperatura <- data.frame(format(df$temperatura$ts,scientific=FALSE),df$temperatura$value,stringsAsFactors = FALSE)
