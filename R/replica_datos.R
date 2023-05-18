@@ -14,7 +14,7 @@
 #'
 #' @export
 
-replica_datos <- function(nombre_PLC, num_climas){
+replica_datos <- function(nombre_PLC){
 
   if(nombre_PLC != "PLC P6_2"){
     return(0)
