@@ -128,6 +128,52 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   }
 
 
+
+
+
+
+
+  #---------------------------------------------------------------
+  # GET REGISTROS DE AUDITORIA PARA DECIDIR SI PONGO EN MANUAL O AUTO
+
+  # Registros auditoria
+  fecha_base <- as.numeric(as.POSIXct(Sys.Date()-5))*1000 # Timestamp en ms
+  url_thb_fechas <- paste("http://88.99.184.239:30951/api/audit/logs/user/c53af270-f104-11eb-abdb-6ff341d2a022?pageSize=10000&page=0&startTime=",fecha_base,"&actionTypes=ATTRIBUTES_UPDATED",sep = "")
+  peticion <- GET(url_thb_fechas, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
+  df <- jsonlite::fromJSON(rawToChar(peticion$content))
+  df <- df$data
+  if(nrow(df) == 0){  # Si hoy no hay acciones, pongo en manual como hasta ahora.
+    print("No hay acciones por parte del mantenedor. Continuo con rutina automática")
+  }else{
+    df$createdTime <- as.Date(as.POSIXct(df$createdTime/1000, origin="1970-01-01"))
+    df <- df[order(df$createdTime, decreasing = TRUE),]
+    df <- df[df$createdTime == Sys.Date(),]  # Filtro acciones de hoy
+
+    df <- df[1,]
+    id_activo <- df$entityId$id
+    nombre_activo <- df$entityName
+
+    acciones <- df$actionData$attributes
+    acciones_cambio_auto_manual <- acciones[,grep("Modo",colnames(acciones))] # Solo acciones de cambio a auto o manual
+    acciones_cambio_auto_manual$id_activo <- id_activo
+    acciones_cambio_auto_manual$nombre_activo <- nombre_activo
+
+    nombre_plantas <- c("RC1_P8","RC1_P7","RC1_P6_Z2","RC1_P6_Z1","RC1_P5","RC1_P4","RC1_P3","RC1_P2","RC1_P1","RC1_PB","Metro_Plaza","Metro_P4","Metro_Avenida","	Metro_Interior")
+    names(nombre_plantas) <- c("PLC P8","PLC P7","PLC P6_2","PLC P6_1","PLC P5","PLC P4","PLC P3","PLC P2","PLC P1","PLC PB","PLC Metro Plaza","PLC Metro P4","PLC Metro Avenida","PLC Metro Interior")
+
+    # FILTRO POR PLANTA ACTUACIÓN
+    nombre_planta_filtro <- nombre_plantas[nombre_PLC]
+    acciones_cambio_auto_manual <- acciones_cambio_auto_manual[acciones_cambio_auto_manual$nombre_activo == nombre_planta_filtro,]
+    numeros_clima_acciones <- as.numeric(substr(colnames(acciones_cambio_auto_manual), nchar(colnames(acciones_cambio_auto_manual)[1]),nchar(colnames(acciones_cambio_auto_manual)[1])))
+
+
+  }
+
+  #---------------------------------------------------------------
+
+
+
+
   # ==============================================================================
   # GET TEMPERATURA ZONAS FALLOS
   # ==============================================================================
@@ -189,6 +235,22 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
 
     pos_frio <- grep(" frio", df_consignas_seleccion$key)
     pos_calor <- 1 + (2-pos_frio)
+
+
+
+
+
+    # ------
+    # Reviso si tengo que poner en manual o no en base al comando del usuario mantenedor
+    if(!is.na(numeros_clima_acciones[i])){
+      if(numeros_clima_acciones[i] == i){
+        valor_mantenedor <- acciones_cambio_auto_manual[,i]
+        if(valor_mantenedor == "false"){  # Salto la iteración, aquí tiene preferencia la opción del mantenedor.
+          next
+        }
+      }
+    }
+    # ------
 
 
     if(as.numeric(df_temperatura$temperatura) > df_consignas_seleccion$value[pos_frio][[1]] & as.numeric(df_temperatura$temperatura) - df_consignas_seleccion$value[pos_frio][[1]] > 0.1){  # HACE CALOR. PUESTA EN MANUAL Y ABRIR FRIO
