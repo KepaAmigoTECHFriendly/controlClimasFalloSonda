@@ -143,13 +143,13 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   peticion <- GET(url_thb_fechas, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
   df <- jsonlite::fromJSON(rawToChar(peticion$content))
   df <- df$data
+  df$createdTime <- as.Date(as.POSIXct(df$createdTime/1000, origin="1970-01-01"))
+  df <- df[order(df$createdTime, decreasing = TRUE),]
+  df <- df[df$createdTime == Sys.Date(),]  # Filtro acciones de hoy
   if(nrow(df) == 0){  # Si hoy no hay acciones, pongo en manual como hasta ahora.
     print("No hay acciones por parte del mantenedor. Continuo con rutina automática")
     flag_registro <- 0
   }else{
-    df$createdTime <- as.Date(as.POSIXct(df$createdTime/1000, origin="1970-01-01"))
-    df <- df[order(df$createdTime, decreasing = TRUE),]
-    df <- df[df$createdTime == Sys.Date(),]  # Filtro acciones de hoy
 
     df <- df[1,]
     id_activo <- df$entityId$id
