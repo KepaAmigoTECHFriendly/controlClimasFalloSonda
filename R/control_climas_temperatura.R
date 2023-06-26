@@ -242,14 +242,14 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
 
     # ------
     # Reviso si tengo que poner en manual o no en base al comando del usuario mantenedor
-    if(!is.na(numeros_clima_acciones[i])){
-      if(numeros_clima_acciones[i] == i){
-        valor_mantenedor <- acciones_cambio_auto_manual[,i]
-        if(valor_mantenedor == "false"){  # Salto la iteración, aquí tiene preferencia la opción del mantenedor.
-          next
-        }
-      }
-    }
+    #if(!is.na(numeros_clima_acciones[i])){
+    #  if(numeros_clima_acciones[i] == i){
+    #    valor_mantenedor <- acciones_cambio_auto_manual[,i]
+    #    if(valor_mantenedor == "false"){  # Salto la iteración, aquí tiene preferencia la opción del mantenedor.
+    #      next
+    #    }
+    #  }
+    #}
     # ------
 
 
