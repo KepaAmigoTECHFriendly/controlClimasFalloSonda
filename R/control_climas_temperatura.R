@@ -137,6 +137,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   # GET REGISTROS DE AUDITORIA PARA DECIDIR SI PONGO EN MANUAL O AUTO
 
   # Registros auditoria
+  flag_registro <- 1
   fecha_base <- as.numeric(as.POSIXct(Sys.Date()-5))*1000 # Timestamp en ms
   url_thb_fechas <- paste("http://88.99.184.239:30951/api/audit/logs/user/c53af270-f104-11eb-abdb-6ff341d2a022?pageSize=10000&page=0&startTime=",fecha_base,"&actionTypes=ATTRIBUTES_UPDATED",sep = "")
   peticion <- GET(url_thb_fechas, add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb))
@@ -144,6 +145,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   df <- df$data
   if(nrow(df) == 0){  # Si hoy no hay acciones, pongo en manual como hasta ahora.
     print("No hay acciones por parte del mantenedor. Continuo con rutina automática")
+    flag_registro <- 0
   }else{
     df$createdTime <- as.Date(as.POSIXct(df$createdTime/1000, origin="1970-01-01"))
     df <- df[order(df$createdTime, decreasing = TRUE),]
@@ -242,14 +244,16 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
 
     # ------
     # Reviso si tengo que poner en manual o no en base al comando del usuario mantenedor
-    #if(!is.na(numeros_clima_acciones[i])){
-    #  if(numeros_clima_acciones[i] == i){
-    #    valor_mantenedor <- acciones_cambio_auto_manual[,i]
-    #    if(valor_mantenedor == "false"){  # Salto la iteración, aquí tiene preferencia la opción del mantenedor.
-    #      next
-    #    }
-    #  }
-    #}
+    if(flag_registro == 1){
+      if(!is.na(numeros_clima_acciones[i])){
+        if(numeros_clima_acciones[i] == i){
+          valor_mantenedor <- acciones_cambio_auto_manual[,i]
+          if(valor_mantenedor == "false"){  # Salto la iteración, aquí tiene preferencia la opción del mantenedor.
+            next
+          }
+        }
+      }
+    }
     # ------
 
 
