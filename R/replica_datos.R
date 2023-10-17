@@ -16,7 +16,7 @@
 
 replica_datos <- function(nombre_PLC){
 
-  if(nombre_PLC != "PLC P1"){
+  if(nombre_PLC != "PLC Metro Interior"){
     return(0)
   }
 
@@ -71,16 +71,17 @@ replica_datos <- function(nombre_PLC){
   df <- as.data.frame(df)
   df <- df[,-c(1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)]
   colnames(df) <- rownames(df_2)
-  df$temperatura_ambiente_2 <- 0
-  df$temperatura_ambiente_3 <- 0
-  df$climatizadora_2 <- 0
-  df$climatizadora_3 <- 0
-  df$estado_electroválvula_2_calor <- 0
-  df$estado_electroválvula_3_calor <- 0
-  df$estado_electroválvula_2_frío <- 0
-  df$estado_electroválvula_3_frio <- 0
-  df$temperatura_impulsión_2 <- 0
-  df$temperatura_impulsión_3 <- 0
+  df <- df[,c(1,4,7,10,13)]
+  #df$temperatura_ambiente_2 <- 0
+  #df$temperatura_ambiente_3 <- 0
+  #df$climatizadora_2 <- 0
+  #df$climatizadora_3 <- 0
+  #df$estado_electroválvula_2_calor <- 0
+  #df$estado_electroválvula_3_calor <- 0
+  #df$estado_electroválvula_2_frío <- 0
+  #df$estado_electroválvula_3_frio <- 0
+  #df$temperatura_impulsión_2 <- 0
+  #df$temperatura_impulsión_3 <- 0
 
   json <- toJSON(df)
   json <- gsub("\\[","",json)
