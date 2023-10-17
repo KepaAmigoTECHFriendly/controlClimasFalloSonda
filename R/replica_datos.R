@@ -87,7 +87,7 @@ replica_datos <- function(nombre_PLC){
   json <- gsub("\\[","",json)
   json <- gsub("\\]","",json)
 
-  id <- "4d305860-e9f7-11eb-9b5b-b36690b9a0e5"
+  id <- "16b901b0-1e90-11ec-a3bf-39d69cec15b9"
 
   url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id,"/timeseries/ANY",sep = "")
   json_envio_plataforma <- json
