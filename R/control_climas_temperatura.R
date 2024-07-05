@@ -175,6 +175,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
 
         # FILTRO POR PLANTA ACTUACIÓN
         nombre_planta_filtro <- nombre_plantas[nombre_PLC]
+        acciones_cambio_auto_manual <- as.data.frame(acciones_cambio_auto_manual)
         acciones_cambio_auto_manual <- acciones_cambio_auto_manual[acciones_cambio_auto_manual$nombre_activo == nombre_planta_filtro,]
         numeros_clima_acciones <- as.numeric(substr(colnames(acciones_cambio_auto_manual), nchar(colnames(acciones_cambio_auto_manual)[1]),nchar(colnames(acciones_cambio_auto_manual)[1])))
 
