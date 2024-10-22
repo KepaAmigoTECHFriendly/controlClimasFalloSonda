@@ -111,7 +111,32 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
       #                   verify= FALSE,
       #                   encode = "json",verbose()
       #)
-      Sys.sleep(2)
+      Sys.sleep(5)
+
+      CTc <- as.numeric(df_consignas$value[df_consignas$key == "Consigna Tº 1"])
+      CTf <- as.numeric(df_consignas$value[df_consignas$key == "Consigna Tº 1 frio"])
+
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Consigna Tº ',1,'":', CTc,'}',sep = "")
+      print(json_envio_plataforma)
+      post <- httr::POST(url = url,
+                        add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                        body = json_envio_plataforma,
+                        verify= FALSE,
+                        encode = "json",verbose()
+      )
+      Sys.sleep(5)
+
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Consigna Tº ',1,' frio":', CTf,'}',sep = "")
+      print(json_envio_plataforma)
+      post <- httr::POST(url = url,
+                        add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                        body = json_envio_plataforma,
+                        verify= FALSE,
+                        encode = "json",verbose()
+      )
+      Sys.sleep(5)
 
       return(json_envio_plataforma) # Termino el programa
     }
@@ -253,7 +278,30 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
                         verify= FALSE,
                         encode = "json",verbose()
       )
-      Sys.sleep(10)
+      CTc <- as.numeric(df_consignas$value[df_consignas$key == paste("Consigna Tº ",i,sep = "")])
+      CTf <- as.numeric(df_consignas$value[df_consignas$key == paste("Consigna Tº ",i," frio",sep = "")])
+
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Consigna Tº ',i,'":', CTc,'}',sep = "")
+      print(json_envio_plataforma)
+      post <- httr::POST(url = url,
+                        add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                        body = json_envio_plataforma,
+                        verify= FALSE,
+                        encode = "json",verbose()
+      )
+      Sys.sleep(5)
+
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Consigna Tº ',i,' frio":', CTf,'}',sep = "")
+      print(json_envio_plataforma)
+      post <- httr::POST(url = url,
+                        add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                        body = json_envio_plataforma,
+                        verify= FALSE,
+                        encode = "json",verbose()
+      )
+      Sys.sleep(5)
 
       next # Avanzo la ejecucion
     }else{
@@ -275,7 +323,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
                              verify= FALSE,
                              encode = "json",verbose()
           )
-          Sys.sleep(5)
+          Sys.sleep(10)
 
           # Notificación puesta en automático a través de atributo servidor, puesta en local.
           url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
@@ -308,7 +356,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
                                verify= FALSE,
                                encode = "json",verbose()
             )
-            Sys.sleep(5)
+            Sys.sleep(10)
 
             # Notificación puesta en automático a través de atributo servidor, puesta en local.
             url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
