@@ -275,7 +275,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
                              verify= FALSE,
                              encode = "json",verbose()
           )
-          Sys.sleep(10)
+          Sys.sleep(5)
 
           # Notificación puesta en automático a través de atributo servidor, puesta en local.
           url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
@@ -308,7 +308,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
                                verify= FALSE,
                                encode = "json",verbose()
             )
-            Sys.sleep(10)
+            Sys.sleep(5)
 
             # Notificación puesta en automático a través de atributo servidor, puesta en local.
             url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
