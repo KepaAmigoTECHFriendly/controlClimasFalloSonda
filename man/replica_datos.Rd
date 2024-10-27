@@ -4,7 +4,7 @@
 \alias{replica_datos}
 \title{Replica datos}
 \usage{
-replica_datos(nombre_PLC, num_climas)
+replica_datos(nombre_PLC)
 }
 \arguments{
 \item{nombre_PLC}{}
