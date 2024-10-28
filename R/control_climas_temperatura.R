@@ -293,7 +293,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
     if(df_atributos_control_usuario$value[i] == "Manual"){
       # Puesta en manual
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',1,'":', '"true"','}',sep = "")
+      json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',i,'":', '"true"','}',sep = "")
       print(json_envio_plataforma)
       post <- httr::POST(url = url,
                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
