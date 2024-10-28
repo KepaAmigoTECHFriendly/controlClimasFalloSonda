@@ -75,11 +75,15 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   df_atributos_seleccion <- data.frame()
   df_atributos_control_usuario_parcial <- data.frame()
   df_atributos_control_usuario <- data.frame()
+  df_atributos_climas_parcial <- data.frame()
+  df_atributos_climas_seleccion <- data.frame()
   for(i in 1:num_climas){
     df_atributos_seleccion_parcial <- df_atr[which(df_atr$key %in% c(paste("Consigna Tº ",i,sep = ""), paste("Consigna Tº ",i," frio",sep = ""))),]
     df_atributos_seleccion <- rbind(df_atributos_seleccion,df_atributos_seleccion_parcial)
     df_atributos_control_usuario_parcial <- df_atr[which(df_atr$key %in% c(paste("control_usuario_",i,sep = ""))),]
     df_atributos_control_usuario <- rbind(df_atributos_control_usuario,df_atributos_control_usuario_parcial)
+    df_atributos_climas_parcial <- df_atr[which(df_atr$key %in% c(paste("Climatizadora OFF/ON ",i,sep = ""), paste("Grado apertura EV_calor ",i,sep = ""), paste("Grado apertura EV_frio ",i,sep = ""))),]
+    df_atributos_climas_seleccion <- rbind(df_atributos_seleccion,df_atributos_climas_parcial)
   }
   df_consignas <- df_atributos_seleccion
 
@@ -96,7 +100,41 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
                          verify= FALSE,
                          encode = "json",verbose()
       )
-      Sys.sleep(2)
+      Sys.sleep(10)
+
+      valor <- df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Climatizadora OFF/ON ",1,sep = "")]
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',1,'":"', tolower(as.character(valor)),'"','}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+      valor <- df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Grado apertura EV_calor ",1,sep = "")]
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',1,'":', valor,'}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+      valor <- df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Grado apertura EV_frio ",1,sep = "")]
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',1,'":', valor,'}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
 
       return(json_envio_plataforma) # Termino el programa
 
@@ -262,6 +300,40 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
                         body = json_envio_plataforma,
                         verify= FALSE,
                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+
+      valor <- df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Climatizadora OFF/ON ",i,sep = "")]
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',i,'":"', tolower(as.character(valor)),'"','}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+      valor <- df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Grado apertura EV_calor ",i,sep = "")]
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',i,'":', valor,'}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+      valor <- df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Grado apertura EV_frio ",i,sep = "")]
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',i,'":', valor,'}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
       )
       Sys.sleep(10)
 
