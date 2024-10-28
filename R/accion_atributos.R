@@ -93,7 +93,7 @@ accion_atributos <- function(nombre_PLC, num_climas){
                        verify= FALSE,
                        encode = "json",verbose()
     )
-    Sys.sleep(7)
+    Sys.sleep(10)
     valor <- df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Grado apertura EV_calor ",i,sep = "")]
     # Encendido climatizadora
     url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
@@ -104,7 +104,7 @@ accion_atributos <- function(nombre_PLC, num_climas){
                        verify= FALSE,
                        encode = "json",verbose()
     )
-    Sys.sleep(7)
+    Sys.sleep(10)
     valor <- df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Grado apertura EV_frio ",i,sep = "")]
     # Encendido climatizadora
     url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
@@ -115,7 +115,7 @@ accion_atributos <- function(nombre_PLC, num_climas){
                        verify= FALSE,
                        encode = "json",verbose()
     )
-    Sys.sleep(7)
+    Sys.sleep(10)
   }
 
   return(json_envio_plataforma)
