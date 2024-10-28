@@ -83,7 +83,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
     df_atributos_control_usuario_parcial <- df_atr[which(df_atr$key %in% c(paste("control_usuario_",i,sep = ""))),]
     df_atributos_control_usuario <- rbind(df_atributos_control_usuario,df_atributos_control_usuario_parcial)
     df_atributos_climas_parcial <- df_atr[which(df_atr$key %in% c(paste("Climatizadora OFF/ON ",i,sep = ""), paste("Grado apertura EV_calor ",i,sep = ""), paste("Grado apertura EV_frio ",i,sep = ""))),]
-    df_atributos_climas_seleccion <- rbind(df_atributos_seleccion,df_atributos_climas_parcial)
+    df_atributos_climas_seleccion <- rbind(df_atributos_climas_seleccion,df_atributos_climas_parcial)
   }
   df_consignas <- df_atributos_seleccion
 
