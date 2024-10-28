@@ -102,10 +102,12 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
       )
       Sys.sleep(10)
 
-      valor <- df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Climatizadora OFF/ON ",1,sep = "")]
+      valor <- as.logical(df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Climatizadora OFF/ON ",1,sep = "")])
       # Encendido climatizadora
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',1,'":', as.logical(tolower(as.character(valor))),'}',sep = "")
+      json_envio_plataforma <- toJSON(setNames(list(valor), paste("Climatizadora OFF/ON ",1,sep = "")), auto_unbox = TRUE)
+      json_envio_plataforma <- gsub("\\[","",json_envio_plataforma)
+      json_envio_plataforma <- gsub("\\]","",json_envio_plataforma)
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
@@ -303,10 +305,12 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
       )
       Sys.sleep(10)
 
-      valor <- df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Climatizadora OFF/ON ",i,sep = "")]
+      valor <- as.logical(df_atributos_climas_seleccion$value[df_atributos_climas_seleccion$key == paste("Climatizadora OFF/ON ",i,sep = "")])
       # Encendido climatizadora
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',i,'":', as.logical(tolower(as.character(valor))),'}',sep = "")
+      json_envio_plataforma <- toJSON(setNames(list(valor), paste("Climatizadora OFF/ON ",i,sep = "")), auto_unbox = TRUE)
+      json_envio_plataforma <- gsub("\\[","",json_envio_plataforma)
+      json_envio_plataforma <- gsub("\\]","",json_envio_plataforma)
       post <- httr::POST(url = url,
                          add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                          body = json_envio_plataforma,
