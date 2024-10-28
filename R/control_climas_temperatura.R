@@ -90,12 +90,12 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',1,'":', '"true"','}',sep = "")
       print(json_envio_plataforma)
-      #post <- httr::POST(url = url,
-      #                   add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-      #                   body = json_envio_plataforma,
-      #                   verify= FALSE,
-      #                   encode = "json",verbose()
-      #)
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
       Sys.sleep(2)
 
       return(json_envio_plataforma) # Termino el programa
@@ -105,12 +105,12 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
       json_envio_plataforma <- paste('{"Modo trabajo climatizadora (auto/man) ',1,'":', '"false"','}',sep = "")
       print(json_envio_plataforma)
-      #post <- httr::POST(url = url,
-      #                   add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-      #                   body = json_envio_plataforma,
-      #                   verify= FALSE,
-      #                   encode = "json",verbose()
-      #)
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
       Sys.sleep(5)
 
       CTc <- as.numeric(df_consignas$value[df_consignas$key == "Consigna Tº 1"])
