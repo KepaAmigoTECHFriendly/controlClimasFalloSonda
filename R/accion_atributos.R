@@ -2,11 +2,11 @@
 #'
 #' @description Refuerza el envio de atributos cuando estos son multiples
 #'
-#' @param nombre_PLC, num_climas
+#' @param nombre_PLC, num_climas, variable, numero
 #'
 #' @return json
 #'
-#' @examples  accion_atributos("PLC_LOPY_RC1_7",3)
+#' @examples  accion_atributos("PLC_LOPY_RC1_7",3,"clima","1,2")
 #'
 #' @import httr
 #' jsonlite
@@ -18,6 +18,8 @@ accion_atributos <- function(nombre_PLC, num_climas){
 
   nombre_PLC <- as.character(nombre_PLC)
   num_climas <- as.numeric(num_climas)
+  variable <- as.character(variable)
+  numero <- as.numeric(unlist(strsplit(numero, ",")))
   if(num_climas == 2){
     num_climas <- 1
   }
@@ -75,58 +77,95 @@ accion_atributos <- function(nombre_PLC, num_climas){
   df_atributos_seleccion <- data.frame()
   df_atributos_control_usuario_parcial <- data.frame()
   df_atributos_control_usuario <- data.frame()
-  for(i in 1:num_climas){
-    df_atributos_seleccion_parcial <- df_atr[which(df_atr$key %in% c(paste("Climatizadora OFF/ON ",i,sep = ""), paste("Grado apertura EV_calor ",i,sep = ""), paste("Grado apertura EV_frio ",i,sep = ""))),]
+  for(i in numero){
+    if(variable == "clima"){
+      df_atributos_seleccion_parcial <- df_atr[which(df_atr$key %in% c(paste("Climatizadora OFF/ON ",i,sep = ""))),]
+    }else if(variable == "electrovalvula"){
+      df_atributos_seleccion_parcial <- df_atr[which(df_atr$key %in% c(paste("Grado apertura EV_calor ",i,sep = ""), paste("Grado apertura EV_frio ",i,sep = ""))),]
+    }else if(variable == "alumbrado"){
+      df_atributos_seleccion_parcial <- df_atr[which(df_atr$key %in% c(paste("Alumbrado OFF/ON ",i,sep = ""))),]
+    }
     df_atributos_seleccion <- rbind(df_atributos_seleccion,df_atributos_seleccion_parcial)
     df_atributos_control_usuario_parcial <- df_atr[which(df_atr$key %in% c(paste("control_usuario_",i,sep = ""))),]
     df_atributos_control_usuario <- rbind(df_atributos_control_usuario,df_atributos_control_usuario_parcial)
   }
 
-  for(i in 1:num_climas){
-    Sys.sleep(10)
-    valor <- as.logical(df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Climatizadora OFF/ON ",i,sep = "")])
-    # Encendido climatizadora
-    url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-    #json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',i,'":"', tolower(as.character(valor)),'"','}',sep = "")
-    json_envio_plataforma <- toJSON(setNames(list(valor), paste("Climatizadora OFF/ON ",i,sep = "")), auto_unbox = TRUE)
-    json_envio_plataforma <- gsub("\\[","",json_envio_plataforma)
-    json_envio_plataforma <- gsub("\\]","",json_envio_plataforma)
-    post <- httr::POST(url = url,
-                       add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-                       body = json_envio_plataforma,
-                       verify= FALSE,
-                       encode = "json",verbose()
-    )
-    Sys.sleep(5)
-    post <- httr::POST(url = url,
-                       add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-                       body = json_envio_plataforma,
-                       verify= FALSE,
-                       encode = "json",verbose()
-    )
-    Sys.sleep(5)
-    valor <- df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Grado apertura EV_calor ",i,sep = "")]
-    # Encendido climatizadora
-    url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-    json_envio_plataforma <- paste('{"Grado apertura EV_calor ',i,'":', valor,'}',sep = "")
-    post <- httr::POST(url = url,
-                       add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-                       body = json_envio_plataforma,
-                       verify= FALSE,
-                       encode = "json",verbose()
-    )
-    Sys.sleep(10)
-    valor <- df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Grado apertura EV_frio ",i,sep = "")]
-    # Encendido climatizadora
-    url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-    json_envio_plataforma <- paste('{"Grado apertura EV_frio ',i,'":', valor,'}',sep = "")
-    post <- httr::POST(url = url,
-                       add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
-                       body = json_envio_plataforma,
-                       verify= FALSE,
-                       encode = "json",verbose()
-    )
-    
+  for(i in numero){
+
+    if(variable == "clima"){
+      Sys.sleep(10)
+      valor <- as.logical(df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Climatizadora OFF/ON ",i,sep = "")])
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      #json_envio_plataforma <- paste('{"Climatizadora OFF/ON ',i,'":"', tolower(as.character(valor)),'"','}',sep = "")
+      json_envio_plataforma <- toJSON(setNames(list(valor), paste("Climatizadora OFF/ON ",i,sep = "")), auto_unbox = TRUE)
+      json_envio_plataforma <- gsub("\\[","",json_envio_plataforma)
+      json_envio_plataforma <- gsub("\\]","",json_envio_plataforma)
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(5)
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+    }
+
+    if(variable == "electrovalvula"){
+      Sys.sleep(10)
+      valor <- df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Grado apertura EV_calor ",i,sep = "")]
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_calor ',i,'":', valor,'}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(10)
+      valor <- df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Grado apertura EV_frio ",i,sep = "")]
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- paste('{"Grado apertura EV_frio ',i,'":', valor,'}',sep = "")
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+
+    }
+
+    if(variable == "alumbrado"){
+      Sys.sleep(10)
+      valor <- as.logical(df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Alumbrado OFF/ON ",i,sep = "")])
+      # Encendido climatizadora
+      url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
+      json_envio_plataforma <- toJSON(setNames(list(valor), paste("Climatizadora OFF/ON ",i,sep = "")), auto_unbox = TRUE)
+      json_envio_plataforma <- gsub("\\[","",json_envio_plataforma)
+      json_envio_plataforma <- gsub("\\]","",json_envio_plataforma)
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+      Sys.sleep(5)
+      post <- httr::POST(url = url,
+                         add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
+                         body = json_envio_plataforma,
+                         verify= FALSE,
+                         encode = "json",verbose()
+      )
+    }
+
+
   }
 
   return(json_envio_plataforma)

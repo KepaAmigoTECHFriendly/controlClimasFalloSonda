@@ -7,7 +7,7 @@
 accion_atributos(nombre_PLC, num_climas)
 }
 \arguments{
-\item{nombre_PLC, }{num_climas}
+\item{nombre_PLC, }{num_climas, variable, numero}
 }
 \value{
 json
@@ -16,6 +16,6 @@ json
 Refuerza el envio de atributos cuando estos son multiples
 }
 \examples{
- accion_atributos("PLC_LOPY_RC1_7",3)
+ accion_atributos("PLC_LOPY_RC1_7",3,"clima","1,2")
 
 }
