@@ -147,7 +147,7 @@ accion_atributos <- function(nombre_PLC, num_climas, variable, numero){
       valor <- as.logical(df_atributos_seleccion$value[df_atributos_seleccion$key == paste("Alumbrado OFF/ON ",i,sep = "")])
       # Encendido climatizadora
       url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-      json_envio_plataforma <- toJSON(setNames(list(valor), paste("Climatizadora OFF/ON ",i,sep = "")), auto_unbox = TRUE)
+      json_envio_plataforma <- toJSON(setNames(list(valor), paste("Alumbrado OFF/ON ",i,sep = "")), auto_unbox = TRUE)
       json_envio_plataforma <- gsub("\\[","",json_envio_plataforma)
       json_envio_plataforma <- gsub("\\]","",json_envio_plataforma)
       post <- httr::POST(url = url,
