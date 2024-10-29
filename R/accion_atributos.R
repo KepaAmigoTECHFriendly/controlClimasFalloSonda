@@ -14,7 +14,7 @@
 #'
 #' @export
 
-accion_atributos <- function(nombre_PLC, num_climas){
+accion_atributos <- function(nombre_PLC, num_climas, variable, numero){
 
   nombre_PLC <- as.character(nombre_PLC)
   num_climas <- as.numeric(num_climas)
