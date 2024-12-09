@@ -598,7 +598,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
 
         # Abrir válvula calor al 10%
         url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-        json_envio_plataforma <- paste('{"Grado apertura EV_calor ',i,'":', 10,'}',sep = "")
+        json_envio_plataforma <- paste('{"Grado apertura EV_calor ',i,'":', 1,'}',sep = "")
         post <- httr::POST(url = url,
                            add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                            body = json_envio_plataforma,
@@ -609,7 +609,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
 
         # Cerra válvula frio al 10%
         url <- paste("http://88.99.184.239:30951/api/plugins/telemetry/ASSET/",id_planta,"/SERVER_SCOPE",sep = "")
-        json_envio_plataforma <- paste('{"Grado apertura EV_frio ',i,'":', 10,'}',sep = "")
+        json_envio_plataforma <- paste('{"Grado apertura EV_frio ',i,'":', 1,'}',sep = "")
         post <- httr::POST(url = url,
                            add_headers("Content-Type"="application/json","Accept"="application/json","X-Authorization"=auth_thb),
                            body = json_envio_plataforma,
