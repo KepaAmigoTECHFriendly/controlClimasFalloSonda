@@ -21,6 +21,7 @@ control_climas_temperatura <- function(nombre_PLC, num_climas){
   if(num_climas == 2){
     num_climas <- 1
   }
+  
 
   # ==============================================================================
   # PETICIÓN TOKENs THB
